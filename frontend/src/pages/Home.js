@@ -38,9 +38,9 @@ const Home = () => {
             <img src="https://www.iconpacks.net/icons/2/free-delivery-truck-icon-2009-thumb.png" className='h-12'></img>
           </div>
           <h2 className='text-4xl md:text-7xl font-bold py-4'>The Fastest Bakery Delivery to <span className='text-pink-600'>Your Home</span></h2>
-          <p className='font-bold py-3 text-3xl text-pink-500'>Welcome to Heavenly Bites by Biswadeep - Your Sweet Escape!</p>
+          <p className='font-bold py-3 text-3xl text-pink-500'>Welcome to Heavenly Bites by Asmit - Your Sweet Escape!</p>
           <p className='font-bold text-xl text-pink-700'>About Us:</p>
-          <p className='text-base font-medium py-2 '>Indulge in a world of delightful flavors and artisanal creations at Heavenly Bites by Biswadeep. Our bakery store is a labor of love, where every confectionery masterpiece is crafted with precision, and the finest ingredients. Whether you're a fan of classic pastries, crave the latest dessert trends, or seek gluten-free and vegan options, we have something to satisfy every palate. Discover our delectable cupcakes, scrumptious macarons, mouthwatering cakes, and more. Our rotating seasonal specials will keep you coming back for more.</p>
+          <p className='text-base font-medium py-2 '>Indulge in a world of delightful flavors and artisanal creations at Heavenly Bites by Asmit. Our bakery store is a labor of love, where every confectionery masterpiece is crafted with precision, and the finest ingredients. Whether you're a fan of classic pastries, crave the latest dessert trends, or seek gluten-free and vegan options, we have something to satisfy every palate. Discover our delectable cupcakes, scrumptious macarons, mouthwatering cakes, and more. Our rotating seasonal specials will keep you coming back for more.</p>
           <button onClick={handleOrder} className='font-bold text-medium py-2 px-4 text-white bg-green-500 rounded-full hover:bg-green-600'>Order Now!</button>
         </div>
 

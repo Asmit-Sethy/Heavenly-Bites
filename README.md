@@ -1,8 +1,8 @@
 
-# Heavenly Bites by Biswadeep
+# Heavenly Bites by Asmit
 
-Welcome to the Heavenly Bites by Biswadeep repository! This project is a MERN stack application for a bakery store, providing a delightful online experience to order your favorite baked goods.
-![image](https://github.com/biswadeep-roy/bakery-mern/assets/74821633/3c23cd55-8859-44d2-aa4c-7c136e1c1f61)
+Welcome to the Heavenly Bites by Asmit repository! This project is a MERN stack application for a bakery store, providing a delightful online experience to order your favorite baked goods.
+![image](https://github.com/Asmit-roy/bakery-mern/assets/74821633/3c23cd55-8859-44d2-aa4c-7c136e1c1f61)
 
 
 ## Table of Contents
@@ -44,7 +44,7 @@ Welcome to the Heavenly Bites by Biswadeep repository! This project is a MERN st
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/biswadeep-roy/bakery-mern.git
+   git clone https://github.com/Asmit-roy/bakery-mern.git
    ```
 
 2. Navigate to the project directory
@@ -109,9 +109,9 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Contact
 
-For any inquiries or feedback, please reach out to Biswadeep Roy at biswadeeproy1230@gmail.com.
+For any inquiries or feedback, please reach out to Asmit Sethy at Asmitroy1230@gmail.com.
 
 ---
 
-Thank you for visiting Heavenly Bites by Biswadeep! Enjoy your sweet escape!
+Thank you for visiting Heavenly Bites by Asmit! Enjoy your sweet escape!
  

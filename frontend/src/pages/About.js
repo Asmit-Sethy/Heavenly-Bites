@@ -8,7 +8,7 @@ const About = () => {
       
       <h1 className="flex text-4xl mt-4 font-bold mb-4 text-pink-700 justify-center items-center">About Us <RiCake3Line/></h1>
       <p className="font-bold py-3 text-3xl text-pink-500">
-        Welcome to Heavenly Bites by Biswadeep - Your Sweet Escape! </p>
+        Welcome to Heavenly Bites by Asmit - Your Sweet Escape! </p>
         <p className="font-bold text-xl text-pink-700 py-2">We are a
         bakery that takes pride in crafting delicious confections and treats to
         satisfy your cravings.</p>
@@ -21,7 +21,7 @@ const About = () => {
         palate.
       </p>
       <p className="text-xl mb-4">
-        At Heavenly Bites by Biswadeep, we offer a wide variety of delectable
+        At Heavenly Bites by Asmit, we offer a wide variety of delectable
         treats, including cupcakes, macarons, mouthwatering cakes, and more. Our
         rotating seasonal specials ensure there's always something new and
         exciting to try.

@@ -135,49 +135,100 @@ app.get("/product",async (req,res)=>{
 
 
 //***payment gateway***
-console.log(process.env.STRIPE_SECRET_KEY)
-const stripe  = new Stripe(process.env.STRIPE_SECRET_KEY)
-app.post("/create-checkout-session",async(req,res)=>{
+// console.log(process.env.STRIPE_SECRET_KEY)
+// const stripe  = new Stripe(process.env.STRIPE_SECRET_KEY)
+// app.post("/create-checkout-session",async(req,res)=>{
 
-     try{
-      const params = {
-          submit_type : 'pay',
-          mode : "payment",
-          payment_method_types : ['card'],
-          billing_address_collection : "auto",
-          shipping_options : [{shipping_rate : "shr_1NssftSI1DuPTnEumuf8p5YM"}],
+//      try{
+//       const params = {
+//           submit_type : 'pay',
+//           mode : "payment",
+//           payment_method_types : ['card'],
+//           billing_address_collection : "auto",
+//           shipping_options : [{shipping_rate : "shr_1NssftSI1DuPTnEumuf8p5YM"}],
 
-          line_items : req.body.map((item)=>{
-            return{
-              price_data : {
-                currency : "inr",
-                product_data : {
-                  name : item.name,
-                },
-                unit_amount : item.price * 100,
-              },
-              adjustable_quantity : {
-                enabled : true,
-                minimum : 1,
-              },
-              quantity : item.qty
-            }
-          }),
+//           line_items : req.body.map((item)=>{
+//             return{
+//               price_data : {
+//                 currency : "inr",
+//                 product_data : {
+//                   name : item.name,
+//                 },
+//                 unit_amount : item.price * 100,
+//               },
+//               adjustable_quantity : {
+//                 enabled : true,
+//                 minimum : 1,
+//               },
+//               quantity : item.qty
+//             }
+//           }),
 
-          success_url : `${process.env.FRONTEND_URL}/success`,
-          cancel_url : `${process.env.FRONTEND_URL}/cancel`,
+//           success_url : `${process.env.FRONTEND_URL}/success`,
+//           cancel_url : `${process.env.FRONTEND_URL}/cancel`,
 
-      }
+//       }
 
       
-      const session = await stripe.checkout.sessions.create(params)
-      res.status(200).json(session.id)
-     }
-     catch (err){
-        res.status(err.statusCode || 500).json(err.message)
-     }
+//       const session = await stripe.checkout.sessions.create(params)
+//       res.status(200).json(session.id)
+//      }
+//      catch (err){
+//         res.status(err.statusCode || 500).json(err.message)
+//      }
 
-})
+// })
+
+
+
+
+
+
+
+
+console.log("Stripe secret from env:", process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+app.post("/create-checkout-session", async (req, res) => {
+  try {
+    console.log("Incoming cart items:", req.body);
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      payment_method_types: ["card"],
+      line_items: req.body.map((item) => ({
+        price_data: {
+          currency: "inr",
+          product_data: { name: item.name },
+          unit_amount: Math.round(Number(item.price) * 100), // e.g. 600 -> 60000 paise
+        },
+        quantity: item.qty,
+      })),
+      success_url: "http://localhost:3000/success",
+      cancel_url: "http://localhost:3000/cancel",
+    });
+
+    console.log("Created checkout session:", session.id, session.url);
+
+    // 🔴 IMPORTANT: send the URL, not the id
+    res.status(200).json({ url: session.url });
+  } catch (err) {
+    console.error("Stripe error:", err);
+    res.status(err.statusCode || 500).json({ error: err.message });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 app.listen(PORT, () =>console.log("Server is running at port : " + PORT));
