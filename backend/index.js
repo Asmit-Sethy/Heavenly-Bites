@@ -8,17 +8,33 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 
-// ===== ENV DEBUG (for Railway logs) =====
-console.log("=== ENV DEBUG (startup) ===");
-console.log("MONGODB_URL:", process.env.MONGODB_URL ? "SET" : "MISSING");
-console.log("STRIPE_SECRET_KEY:", process.env.STRIPE_SECRET_KEY ? "SET" : "MISSING");
-console.log("FRONTEND_URL:", process.env.FRONTEND_URL || "NOT SET");
-console.log("===========================\n");
-// =======================================
-
+// ------------------- ENV + CONFIG -------------------
 const PORT = process.env.PORT || 8080;
+const MONGODB_URL = process.env.MONGODB_URL;
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
-// ----- Contact schema -----
+// Debug logs for Railway
+console.log("MONGODB_URL present:", !!MONGODB_URL);
+console.log("STRIPE_SECRET_KEY present:", !!STRIPE_SECRET_KEY);
+console.log("FRONTEND_URL:", FRONTEND_URL);
+
+// ------------------- MONGODB CONNECTION -------------------
+mongoose.set("strictQuery", false);
+
+if (!MONGODB_URL) {
+  console.error("❌ MONGODB_URL is not set in environment variables");
+} else {
+  mongoose
+    .connect(MONGODB_URL)
+    .then(() => console.log("✅ Connected to Database"))
+    .catch((err) => {
+      console.error("MongoDB connection error:", err);
+      // DO NOT process.exit here on Railway; let app keep running for logs
+    });
+}
+
+// ------------------- SCHEMAS & MODELS -------------------
 const contactSchema = mongoose.Schema({
   name: String,
   email: String,
@@ -27,22 +43,6 @@ const contactSchema = mongoose.Schema({
 
 const contactModel = mongoose.model("contact", contactSchema);
 
-// ----- MongoDB connection -----
-if (!process.env.MONGODB_URL) {
-  console.error("❌ MONGODB_URL is not set. Exiting.");
-  process.exit(1);
-}
-
-mongoose.set("strictQuery", false);
-mongoose
-  .connect(process.env.MONGODB_URL)
-  .then(() => console.log("✅ Connected to Database"))
-  .catch((err) => {
-    console.error("❌ MongoDB connection error:", err);
-    process.exit(1); // Exit the server on MongoDB connection error
-  });
-
-// ----- User schema -----
 const userSchema = mongoose.Schema({
   firstName: String,
   lastName: String,
@@ -57,34 +57,44 @@ const userSchema = mongoose.Schema({
 
 const userModel = mongoose.model("user", userSchema);
 
-// ----- Base API -----
+const schemaProduct = mongoose.Schema({
+  name: String,
+  category: String,
+  image: String,
+  price: String,
+  description: String,
+});
+
+const productModel = mongoose.model("product", schemaProduct);
+
+// ------------------- BASIC API -------------------
 app.get("/", (req, res) => {
   res.send("Server is running");
 });
 
-// ----- Sign up -----
+// Sign up
 app.post("/signup", async (req, res) => {
   const { email } = req.body;
 
   try {
-    const result = await userModel.findOne({ email }).exec();
+    const result = await userModel.findOne({ email: email });
 
     if (result) {
-      return res
+      res
         .status(400)
         .send({ message: "Email id is already registered", alert: false });
+    } else {
+      const data = userModel(req.body);
+      await data.save();
+      res.send({ message: "Successfully signed up", alert: true });
     }
-
-    const data = userModel(req.body);
-    await data.save();
-    res.send({ message: "Successfully signed up", alert: true });
   } catch (error) {
     console.error("Sign up error:", error);
     res.status(500).send({ message: "Server error" });
   }
 });
 
-// ----- Contact form -----
+// Contact form
 app.post("/submitContactForm", async (req, res) => {
   const { name, email, message } = req.body;
 
@@ -100,11 +110,11 @@ app.post("/submitContactForm", async (req, res) => {
   }
 });
 
-// ----- Login -----
+// Login
 app.post("/login", async (req, res) => {
   const { email } = req.body;
   try {
-    const result = await userModel.findOne({ email }).exec();
+    const result = await userModel.findOne({ email: email }).exec();
 
     if (result) {
       const dataSend = {
@@ -114,7 +124,7 @@ app.post("/login", async (req, res) => {
         email: result.email,
         image: result.image,
       };
-      console.log("Login success:", dataSend);
+      console.log("Login data:", dataSend);
       res.send({
         message: "Login successfully",
         alert: true,
@@ -131,18 +141,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// ----- Product schema -----
-const schemaProduct = mongoose.Schema({
-  name: String,
-  category: String,
-  image: String,
-  price: String,
-  description: String,
-});
-
-const productModel = mongoose.model("product", schemaProduct);
-
-// ----- Upload product -----
+// ------------------- PRODUCTS -------------------
 app.post("/uploadProduct", async (req, res) => {
   try {
     const data = productModel(req.body);
@@ -154,7 +153,6 @@ app.post("/uploadProduct", async (req, res) => {
   }
 });
 
-// ----- Get products -----
 app.get("/product", async (req, res) => {
   try {
     const data = await productModel.find({});
@@ -165,40 +163,42 @@ app.get("/product", async (req, res) => {
   }
 });
 
-// ===== Stripe payment gateway =====
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.warn("⚠️ STRIPE_SECRET_KEY is not set – payment route will fail.");
+// ------------------- STRIPE / CHECKOUT -------------------
+let stripe = null;
+if (!STRIPE_SECRET_KEY) {
+  console.error("❌ STRIPE_SECRET_KEY is not set – payment route will fail.");
+} else {
+  stripe = new Stripe(STRIPE_SECRET_KEY);
 }
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
 app.post("/create-checkout-session", async (req, res) => {
   try {
+    if (!stripe) {
+      return res
+        .status(500)
+        .json({ error: "Stripe is not configured on the server" });
+    }
+
     console.log("Incoming cart items:", req.body);
 
-    const lineItems = req.body.map((item) => ({
+    const line_items = req.body.map((item) => ({
       price_data: {
         currency: "inr",
         product_data: { name: item.name },
-        unit_amount: Math.round(Number(item.price) * 100), // 600 -> 60000 paise
+        unit_amount: Math.round(Number(item.price) * 100), // Rs -> paise
       },
       quantity: item.qty,
     }));
 
-    const frontendUrl =
-      process.env.FRONTEND_URL || "http://localhost:3000"; // fallback for local
-
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
-      line_items: lineItems,
-      success_url: `${frontendUrl}/success`,
-      cancel_url: `${frontendUrl}/cancel`,
+      line_items,
+      success_url: `${FRONTEND_URL}/success`,
+      cancel_url: `${FRONTEND_URL}/cancel`,
     });
 
     console.log("Created checkout session:", session.id, session.url);
-
-    // Send URL (client should redirect to this)
     res.status(200).json({ url: session.url });
   } catch (err) {
     console.error("Stripe error:", err);
@@ -206,5 +206,7 @@ app.post("/create-checkout-session", async (req, res) => {
   }
 });
 
-// ----- Start server -----
-app.listen(PORT, () => console.log("Server is running at port :", PORT));
+// ------------------- START SERVER -------------------
+app.listen(PORT, () =>
+  console.log("Server is running at port :", PORT)
+);
