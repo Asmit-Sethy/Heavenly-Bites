@@ -1,8 +1,7 @@
 
-# Heavenly Bites by Asmit
+# Heavenly Bites
 
 Welcome to the Heavenly Bites by Asmit repository! This project is a MERN stack application for a bakery store, providing a delightful online experience to order your favorite baked goods.
-![image](https://github.com/Asmit-roy/bakery-mern/assets/74821633/3c23cd55-8859-44d2-aa4c-7c136e1c1f61)
 
 
 ## Table of Contents
