@@ -97,20 +97,3 @@ The menu page displays a list of all available bakery products with filtering op
 ### Cart
 
 The cart page allows users to review their selected items, update quantities, and proceed to checkout. It provides a summary of the total cost and integrates with Stripe for secure payments.
-
-## Contributing
-
-We welcome contributions to improve this project! Please fork the repository and create a pull request with your changes. Ensure that your code adheres to the project's coding standards and includes appropriate tests.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-## Contact
-
-For any inquiries or feedback, please reach out to Asmit Sethy at Asmitroy1230@gmail.com.
-
----
-
-Thank you for visiting Heavenly Bites by Asmit! Enjoy your sweet escape!
- 
